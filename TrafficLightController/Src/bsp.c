@@ -10,6 +10,7 @@ void BSP_Init(void);
 {
 }
 
+
 void Signal_Pass(void);
 {
 }
@@ -17,6 +18,7 @@ void Signal_Pass(void);
 void Signal_Block(void);
 {
 }
+
 
 void Signal_Flash(void);
 {
