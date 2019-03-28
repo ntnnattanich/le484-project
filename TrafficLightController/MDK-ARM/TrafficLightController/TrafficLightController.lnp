@@ -1,0 +1,28 @@
+--cpu=Cortex-M4.fp
+"trafficlightcontroller\startup_stm32f407xx.o"
+"trafficlightcontroller\bsp.o"
+"trafficlightcontroller\ctrler.o"
+"trafficlightcontroller\timer.o"
+"trafficlightcontroller\main.o"
+"trafficlightcontroller\stm32f4xx_it.o"
+"trafficlightcontroller\stm32f4xx_hal_msp.o"
+"trafficlightcontroller\stm32f4xx_hal_tim.o"
+"trafficlightcontroller\stm32f4xx_hal_tim_ex.o"
+"trafficlightcontroller\stm32f4xx_hal_rcc.o"
+"trafficlightcontroller\stm32f4xx_hal_rcc_ex.o"
+"trafficlightcontroller\stm32f4xx_hal_flash.o"
+"trafficlightcontroller\stm32f4xx_hal_flash_ex.o"
+"trafficlightcontroller\stm32f4xx_hal_flash_ramfunc.o"
+"trafficlightcontroller\stm32f4xx_hal_gpio.o"
+"trafficlightcontroller\stm32f4xx_hal_dma_ex.o"
+"trafficlightcontroller\stm32f4xx_hal_dma.o"
+"trafficlightcontroller\stm32f4xx_hal_pwr.o"
+"trafficlightcontroller\stm32f4xx_hal_pwr_ex.o"
+"trafficlightcontroller\stm32f4xx_hal_cortex.o"
+"trafficlightcontroller\stm32f4xx_hal.o"
+"trafficlightcontroller\stm32f4xx_hal_exti.o"
+"trafficlightcontroller\system_stm32f4xx.o"
+--library_type=microlib --strict --scatter "TrafficLightController\TrafficLightController.sct"
+--summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list "TrafficLightController.map" -o TrafficLightController\TrafficLightController.axf

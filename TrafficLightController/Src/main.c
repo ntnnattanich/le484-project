@@ -24,6 +24,9 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
+#include "bsp.h"
+#include "timer.h"
+#include "ctrler.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -56,9 +59,27 @@ static void MX_GPIO_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-int fputc(int ch , FILE *f)
+int fputc(int ch, FILE *f)
 {
-	return ITM_SendChar(ch);
+    return ITM_SendChar(ch);
+}
+
+Event_t Event_Detect()
+{
+    Event_t evt = NO_EVT;
+		if(Timeout_Status){
+			evt = TIMEOUT;
+			Timeout_Status = 0;
+		}
+		
+		if (Button_Status){
+			evt = BUTTON;
+			Button_Status = 0;
+		}
+		if(MODE_READ()){ //out of service switch
+			evt = MODE_CHANGE;
+		}
+    return evt;
 }
 /* USER CODE END 0 */
 
@@ -69,7 +90,7 @@ int fputc(int ch , FILE *f)
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
+    
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -101,8 +122,14 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-		printf("Hello, world\n");
-		HAL_Delay(1000);
+		
+		
+    Event_t evt = Event_Detect();   //detect event
+    uint32_t timeout_value = Ctrler_Exec(evt); //Execute state machine, return timeout
+    Timeout_Config(timeout_value); //set timeout value in timer
+	  MIN_GREEN_TIME = GREEN_TIME_READ() ? 600:1200; //10s 60s
+		WALK_INTERVAL = WALK_READ() ? 100:200; //10s 20s
+    Delay(1);
   }
   /* USER CODE END 3 */
 }
@@ -156,17 +183,32 @@ static void MX_GPIO_Init(void)
 
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOE_CLK_ENABLE();
+  __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
+  __HAL_RCC_GPIOD_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOC, YELLOW_LAMP_Pin|GREEN_LAMP_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(RED_LAMP_GPIO_Port, RED_LAMP_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin : MODE_SW_Pin */
-  GPIO_InitStruct.Pin = MODE_SW_Pin;
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOD, WALK_Pin|DONT_WALK_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pins : MIN_GREEN_TIME_Pin WALK_INTERVAL_Pin MODE_SW_Pin */
+  GPIO_InitStruct.Pin = MIN_GREEN_TIME_Pin|WALK_INTERVAL_Pin|MODE_SW_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(MODE_SW_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : YELLOW_LAMP_Pin GREEN_LAMP_Pin */
+  GPIO_InitStruct.Pin = YELLOW_LAMP_Pin|GREEN_LAMP_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
   /*Configure GPIO pin : BUTTON1_Pin */
   GPIO_InitStruct.Pin = BUTTON1_Pin;
@@ -180,6 +222,26 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(RED_LAMP_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : BUTTON2_Pin */
+  GPIO_InitStruct.Pin = BUTTON2_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(BUTTON2_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : WALK_Pin DONT_WALK_Pin */
+  GPIO_InitStruct.Pin = WALK_Pin|DONT_WALK_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
+
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI2_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI2_IRQn);
+
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
 }
 
