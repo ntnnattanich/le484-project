@@ -59,9 +59,9 @@ void Signal_Flash(void)
 
 	YELLOW_OFF();
 	DONT_WALK_OFF();
-	Delay(10);
+	Delay(8); //40%
 	YELLOW_ON();
 	DONT_WALK_ON();
-	Delay(10); 
+	Delay(12); //60%
 	
 }

@@ -127,8 +127,8 @@ int main(void)
     Event_t evt = Event_Detect();   //detect event
     uint32_t timeout_value = Ctrler_Exec(evt); //Execute state machine, return timeout
     Timeout_Config(timeout_value); //set timeout value in timer
-	  MIN_GREEN_TIME = GREEN_TIME_READ() ? 600:1200; //10s 60s
-		WALK_INTERVAL = WALK_READ() ? 100:200; //10s 20s
+	  MIN_GREEN_TIME = GREEN_TIME_READ() ? 600:1200;
+		WALK_INTERVAL = WALK_READ() ? 100:200;
     Delay(1);
   }
   /* USER CODE END 3 */
